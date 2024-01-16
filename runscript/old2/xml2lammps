@@ -1,0 +1,87 @@
+#!/home/mjy/anaconda3/bin/python
+from xml_io import xml_parser
+import numpy as np
+import sys
+
+fname = sys.argv[1]
+
+xml = xml_parser(fname)
+lx, ly, lz = xml.box
+bonds = xml.nodes['bond']
+angles = xml.nodes['angle']
+types = xml.nodes['type']
+images = xml.nodes['image']
+#positions = xml.nodes['position'] + xml.box * images
+positions = xml.nodes['position']
+allbondnames = list(np.unique(bonds[:, 0]))
+allanglenames = list(np.unique(angles[:, 0]))
+#alltypenames = list(set(types))
+alltypenames = list(np.unique(types))
+atomtypeid = [alltypenames.index(_)+1 for _ in types]
+bondtypeid = [allbondnames.index(_)+1 for _ in bonds[:, 0]]
+angletypeid = [allanglenames.index(_)+1 for _ in angles[:, 0]]
+natoms = positions.shape[0]
+nbonds = bonds.shape[0]
+nangles = angles.shape[0]
+natomtypes = np.unique(types).shape[0]
+nbondtypes = np.unique(bonds[:, 0]).shape[0]
+nangletypes = np.unique(angles[:, 0]).shape[0]
+
+o = open("bond.lj", 'w')
+o.write("\n\n")
+o.write("%d atoms\n"%(natoms))
+o.write("%d bonds\n"%(nbonds))
+o.write("%d angles\n"%(nangles))
+o.write("\n")
+
+# types
+o.write("%d atom types\n"%(natomtypes))
+o.write("%d bond types\n"%(nbondtypes))
+o.write("%d angle types\n"%(nangletypes))
+o.write("\n")
+
+# box
+o.write("%.2f %.2f xlo xhi\n"%(-lx/2.0, ly/2.0))
+o.write("%.2f %.2f ylo yhi\n"%(-ly/2.0, ly/2.0))
+o.write("%.2f %.2f zlo zhi\n"%(-lz/2.0, lz/2.0))
+o.write("\n")
+
+# atoms
+o.write("Atoms # atom-ID molecule-ID atom-type q x y z nx ny nz\n")
+o.write("\n")
+for i in range(natoms):
+    index = i + 1
+    mol   = 1
+    charge = 0.0
+    typeid = atomtypeid[i]
+    x, y, z = positions[i]
+    nx, ny, nz = images[i]
+    # o.write("%d %d %d %.7f %.7f %.7f %d %d %d\n"%(index, mol, typeid, x, y, z, nx, ny, nz)) 
+    o.write("%d %d %d %.1f %.7f %.7f %.7f %d %d %d\n"%(index, mol,  typeid, charge, x, y, z, nx, ny, nz)) 
+o.write("\n")
+
+# masss
+#o.write("Masses\n")
+#o.write("\n")
+#for i in range(len(alltypenames)):
+#    index = i + 1
+#    o.write("%d %.2f\n"%(index, 1.0)) 
+#o.write("\n")
+
+o.write("Bonds\n")
+o.write("\n")
+for i in range(nbonds):
+    index = i + 1
+    bondtype = bondtypeid[i]
+    a, b = bonds[i][1:] + 1
+    o.write("%d %d %d %d\n"%(index, bondtype, a, b)) 
+o.write("\n")
+
+o.write("Angles\n")
+o.write("\n")
+for i in range(nangles):
+    index = i + 1
+    angletype = angletypeid[i]
+    a, b, c = angles[i][1:] + 1
+    o.write("%d %d %d %d %d\n"%(index, angletype, a, b, c))
+o.close()

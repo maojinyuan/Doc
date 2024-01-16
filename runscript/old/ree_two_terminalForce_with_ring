@@ -1,0 +1,39 @@
+#!/opt/anaconda/Anaconda3-2022.05/bin/python
+import numpy as np
+from simpletraj.dcd.dcd import DCDReader
+import os
+import time
+
+def get_all_dir_path(path):
+    dir_list = []
+    for root, dirs, files in os.walk(path):
+        for dir in dirs:
+            dir_list.append(os.path.join(root, dir))
+    return sorted(dir_list)
+# for file in sorted(get_all_dir_path(os.getcwd())):
+#     os.chdir(file)
+#     #print(os.getcwd().split('/')[-1])
+#     os.system("echo -e '2:gpu=0' | galaTackle particle.0000000000.xml particle.dcd > ree2.log")
+#     with open("ed2.log", "r") as f:
+#         content = f.readlines()
+#     contents = []
+#     for i in content:
+#         contents.append(float(i.split()[2]))
+#     ls = np.array(contents)
+#     # print("The mean Ree(300 samples) is:", np.sqrt(np.mean(ls[-300:])))
+#     print(np.sqrt(np.mean(ls[-300:])))
+for file in sorted(get_all_dir_path(os.getcwd())):
+    os.chdir(file)
+    with open('particle.0010000000.xml', 'r') as f:
+        for i in range(3):
+            line = f.readline()
+    natoms = int(line.split(" ")[-2].split("\"")[-2]) - 1 - 7
+    print("particle index of [0-"+str(natoms)+"]")
+    dcd = DCDReader('particle.dcd')
+    pos = np.asarray([_.copy() for _ in dcd]).reshape(len(dcd), -1, 3)
+    ree_pre = pos[:, 0, :] - pos[:, natoms, :]
+    ree = np.mean(np.linalg.norm(ree_pre[-1000:], axis=-1))
+    #ree_pre = pos[:, 0, -1] - pos[:, -1, -1]
+    #ree = np.abs(np.mean(ree_pre))
+    #print(file)
+    print(ree)

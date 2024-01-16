@@ -1,0 +1,20 @@
+#!/opt/Anaconda3-2021.11/bin/python
+import random
+
+f = open("out.xml", "r")
+content = f.readlines()
+interval_M = 2
+
+for i in range(0, len(content), int(interval_M)+1):
+    if "M\n" in content[i]:
+        content[i] = content[i].replace("M", "C")
+
+for j in range(0, len(content), int(interval_M)+1):
+    if "R-M-R" in content[j]:
+        content[j] = content[j].replace("R-M-R", "R-C-R")
+
+
+f2 = open("out_change_MtoC_angle.xml", "w")
+f2.writelines(content)
+f.close()
+f2.close()

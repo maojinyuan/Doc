@@ -1,0 +1,14 @@
+#!/usr/bin/bash
+if [ $# -eq 0 ]; then
+  filename="particle.0100000000.xml"
+else
+  filename="$1"
+fi
+
+
+find . -type f -name "$filename" | \
+awk -F "force" '{print $2 " " $0}' | \
+sort | \
+awk '{print $2}'
+#
+find . -type f -name "$filename" | wc -l

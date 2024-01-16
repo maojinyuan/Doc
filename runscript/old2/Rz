@@ -1,0 +1,24 @@
+#!/opt/anaconda/Anaconda3-2022.05/bin/python
+import numpy as np
+from simpletraj.dcd.dcd import DCDReader
+import os
+
+N = int(input("N = (default 400)") or "400")
+p = int(input("p_ring = (default 20)") or "20")
+def get_all_dir_path(path):
+    dir_list = []
+    for root, dirs, files in os.walk(path):
+        for dir in dirs:
+            dir_list.append(os.path.join(root, dir))
+    return sorted(dir_list)
+for file in sorted(get_all_dir_path(os.getcwd())):
+    os.chdir(file)
+    dcd = DCDReader('particle.dcd')
+    pos = np.asarray([_.copy() for _ in dcd]).reshape(len(dcd), -1, 3)
+    com = pos[0,(N+p*7):(N+(p+1)*7)].mean(axis=0)
+    v = pos[:,N-1,:] - com[None,:]
+    z_direction_mean = np.abs(v[-1000:,].mean(axis=0))
+    #求模
+    z_direction_mean = np.sqrt(np.sum(z_direction_mean**2))
+    print(z_direction_mean)
+    #print(file)

@@ -1,0 +1,28 @@
+#!/opt/anaconda/Anaconda3-2022.05/bin/python
+import sys
+from xml_io import xml_parser
+from collections import Counter
+
+fname_xml = sys.argv[1]
+xml = xml_parser(fname_xml)
+
+types = xml.nodes['type']
+bonds = xml.nodes['bond']
+angles = xml.nodes['angle']
+
+print(xml.box)
+
+sum_types = Counter(types)
+sum_bonds = Counter(bonds[:,0])
+sum_angles = Counter(angles[:,0])
+
+C1_num = sum_types["C1"]
+C2_num = sum_types["C2"]
+total_C1C2 = C1_num + C2_num
+
+print("type number: " + str(sum_types))
+print("bond number: " + str(sum_bonds))
+print("M:(C1+C2) = " + str(round(sum_types["M"]/total_C1C2, 0)))
+print("Cross-linking rate = " + str(round(sum_bonds["C1-C2"]/C1_num, 2)))
+print("Cross-linking density = " + str(round(sum_bonds["C1-C2"]/(1000000), 4)))
+#print("angle number: " + str(sum_angles))

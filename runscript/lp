@@ -1,0 +1,76 @@
+#!/usr/bin/env python
+import os
+import MDAnalysis as mda
+from MDAnalysis.analysis import polymer
+from matplotlib import pyplot as plt
+import numpy as np
+import pandas as pd
+from list_dir import list_folders, find_files
+import scipy.optimize
+
+def fit_exponential_decay(x, y):
+    def expfunc(x, a):
+        return np.exp(-x/a)
+
+    a = scipy.optimize.curve_fit(expfunc, x, y)[0][0]
+
+    return a
+# x = np.arange(49)
+# y = np.arange(49)
+# print(x.shape, y.shape)
+# plt.plot(x,y)
+# plt.show()
+# exit()
+
+
+folders = list_folders()
+# print(folders)
+# exit()
+
+n_frames = 500
+persistences = []
+lbs = []
+bond_autocorrelations = []
+for file in folders:
+    if "du" in os.getcwd():
+        u = mda.Universe(f"{file}/xml/particle.0100000000.xml", f"{file}/particle.dcd")
+    elif "purepolymer" in os.getcwd():
+        print("--------")
+        u = mda.Universe(f"{file}/particle.0100000000.xml", f"{file}/../particle_1000Period.dcd")
+    else:
+        # u = mda.Universe(f"{file}/particle.0100000000.xml", f"{file}/../particle_100000Period.dcd")
+        u = mda.Universe(f"{file}/xml/particle.0100000000.xml", f"{file}/particle.dcd")
+    total_chain = [u.select_atoms("type A T")]
+    # print(u.trajectory.n_frames)
+    # print(total_chain)
+    persistence_length = polymer.PersistenceLength(total_chain)
+    persistence_length = persistence_length.run(start=u.trajectory.n_frames-n_frames, stop=-1, step=1)
+    # persistences.append(persistence_length.results.lp)
+    # lbs.append(persistence_length.results.lb)
+    # bond_autocorrelations.append(persistence_length.results.bond_autocorrelation)
+    bond_autocorrelations = np.asarray(bond_autocorrelations)
+    # print(bond_autocorrelations.flatten())
+    print(f'The persistence length is: {persistence_length.results.lp}')
+
+# persistences = np.asarray(persistences)
+# lbs = np.asarray(lbs)
+# bond_autocorrelations = np.asarray(bond_autocorrelations).flatten()
+# print(bond_autocorrelations.shape)
+# print(bond_autocorrelations)
+
+# t = 0.005 * 1000
+# time = np.arange(bond_autocorrelations.shape[0]) * t
+# print(time)
+# print(time.shape)
+# plt.scatter(time, bond_autocorrelations)
+# plt.show()
+# np.savetxt("aa.txt", np.c_[time, bond_autocorrelations.flatten()], fmt="%.4f")
+    # plt.plot(time, bond_autocorrelations.flatten())
+    # plt.show()
+
+# print(np.asarray(persistences).shape)
+# print("")
+# print(np.asarray(lbs).shape)
+# print("")
+# print(np.asarray(bond_autocorrelations))
+# print(np.asarray(bond_autocorrelations).shape)

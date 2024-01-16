@@ -1,0 +1,26 @@
+#!/opt/anaconda/Anaconda3-2022.05/bin/python
+import numpy as np
+from simpletraj.dcd.dcd import DCDReader
+import os
+import time
+
+def get_all_dir_path(path):
+    dir_list = []
+    for root, dirs, files in os.walk(path):
+        for dir in dirs:
+            dir_list.append(os.path.join(root, dir))
+    return sorted(dir_list)
+for file in sorted(get_all_dir_path(os.getcwd())):
+    os.chdir(file)
+    #print(os.getcwd().split('/')[-1])
+    with open("rg2.log", "w") as f:
+        f.write(" ")
+    os.system("echo -e '1:gpu=0' | galaTackle particle.0000000000.xml particle.dcd > galatackle.log")
+
+    with open("rg2.log", "r") as f:
+        content = f.readlines()
+    contents = []
+    for i in content:
+        contents.append(float(i.split()[2]))
+    ls = np.array(contents)
+    print("The mean Rg2(300 samples) is:", np.mean(ls[-300:]))

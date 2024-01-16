@@ -1,0 +1,20 @@
+#!/opt/Anaconda3-2021.11/bin/python
+import os
+import sys
+fname_xml = sys.argv[1]
+f = open(fname_xml, "r")
+content = f.readlines()
+
+for i in range(len(content)):
+    if "C\n" in content[i]:
+        content[i] = content[i].replace("C", "C2")
+for i in range(len(content)):
+    if "R-C-R" in content[i]:
+        content[i] = content[i].replace("R-C-R", "R-C2-R")
+
+f2 = open("x2.xml", "w")
+f2.writelines(content)
+f.close()
+f2.close()
+print("Done, type C have chaned to C2")
+print("Done, angle R-C-R have chaned to R-C2-R")
